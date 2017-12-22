@@ -36,11 +36,11 @@ export default class VLCPlayer extends Component {
   }
 
   play() {
-    this.setNativeProps({ paused: true })
+    this.setNativeProps({ paused: false })
   }
 
   pause() {
-    this.setNativeProps({ paused: false })
+    this.setNativeProps({ paused: true })
   }
 
   seek(pos) {
