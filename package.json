@@ -1,0 +1,28 @@
+{
+  "name": "react-native-vlc",
+  "version": "0.0.1",
+  "description": "A <VLCPlayer /> element for react-native",
+  "main": "VLCPlayer.js",
+  "license": "MIT",
+  "keywords": [
+    "vlcplayer",
+    "video",
+    "player"
+  ],
+  "scripts": {
+    "test:fix": "standard --fix"
+  },
+  "author": {
+    "name": "duydatpham",
+    "email": "datpd@luci.vn"
+  },
+  "homepage": "https://github.com/kikill95/react-native-vlc",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kikill95/react-native-vlc"
+  },
+  "devDependencies": {
+    "standard": "^10.0.3"
+  },
+  "dependencies": {}
+}
