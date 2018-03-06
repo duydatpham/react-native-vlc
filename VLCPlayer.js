@@ -10,11 +10,12 @@ const {
   StyleSheet,
   requireNativeComponent,
   View,
-  NativeModules
+  NativeModules,
+  Dimensions
 } = ReactNative
 
 const VLCKPlayerManager = NativeModules.VLCPlayerManager || NativeModules.VLCPlayerModule
-
+let { scale } = Dimensions.get('window');
 export default class VLCPlayer extends Component {
   constructor(props, context) {
     super(props, context)
@@ -108,6 +109,21 @@ export default class VLCPlayer extends Component {
     VLCKPlayerManager.releaseView()
   }
 
+  
+  resize(size) {
+    this.setNativeProps({ resize: size })
+  }
+
+  componentWillReceiveProps(nextProps) {
+    try {
+      if (this.props.style[0].width != nextProps.style[0].width || this.props.style[0].height != nextProps.style[0].height) {
+        this.resize({ width: nextProps.style[0].width * scale, height: nextProps.style[0].height * scale })
+      }
+    } catch (error) {
+
+    }
+  }
+  
   render() {
     const {
       source
