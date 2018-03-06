@@ -11,7 +11,8 @@ const {
   requireNativeComponent,
   View,
   NativeModules,
-  Dimensions
+  Dimensions,
+  Platform
 } = ReactNative
 
 const VLCKPlayerManager = NativeModules.VLCPlayerManager || NativeModules.VLCPlayerModule
@@ -115,12 +116,14 @@ export default class VLCPlayer extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    try {
-      if (this.props.style[0].width != nextProps.style[0].width || this.props.style[0].height != nextProps.style[0].height) {
-        this.resize({ width: nextProps.style[0].width * scale, height: nextProps.style[0].height * scale })
+    if(Platform.OS == 'android'){
+      try {
+        if (this.props.style[0].width != nextProps.style[0].width || this.props.style[0].height != nextProps.style[0].height) {
+          this.resize({ width: nextProps.style[0].width * scale, height: nextProps.style[0].height * scale })
+        }
+      } catch (error) {
+  
       }
-    } catch (error) {
-
     }
   }
   
