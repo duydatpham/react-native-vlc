@@ -110,23 +110,37 @@ export default class VLCPlayer extends Component {
     VLCKPlayerManager.releaseView()
   }
 
-  
+
   resize(size) {
     this.setNativeProps({ resize: size })
   }
 
+  getStyleWidth(props) {
+    if (!props)
+      return undefined
+    for (let i = 0; i < props.length; i++) {
+      if (props[i].width != undefined || props[i].height != undefined) {
+        return props[i]
+      }
+    }
+
+    return undefined
+  }
+
   componentWillReceiveProps(nextProps) {
-    if(Platform.OS == 'android'){
+    if (Platform.OS == 'android') {
       try {
-        if (this.props.style[0].width != nextProps.style[0].width || this.props.style[0].height != nextProps.style[0].height) {
-          this.resize({ width: nextProps.style[0].width * scale, height: nextProps.style[0].height * scale })
+        let currentPropsStyle = this.getStyleWidth(this.props.style)
+        let nextPropsStyle = this.getStyleWidth(nextProps.style)
+        if (currentPropsStyle.width != nextPropsStyle.width || currentPropsStyle.height != nextPropsStyle.height) {
+          this.resize({ width: (nextPropsStyle.width || 0) * scale, height: (nextPropsStyle.height || 0) * scale })
         }
       } catch (error) {
-  
+
       }
     }
   }
-  
+
   render() {
     const {
       source
