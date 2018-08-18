@@ -113,7 +113,7 @@ TextureView.SurfaceTextureListener, LifecycleEventListener, MediaPlayer.EventLis
         inflate(getContext(), R.layout.player, this);
         mSurface = (SurfaceView) findViewById(R.id.vlc_surface);
         holder = mSurface.getHolder();
-
+	mSurface.setZOrderOnTop(true);
         holder.addCallback(new SurfaceHolder.Callback() {
 			@Override
 			public void surfaceDestroyed(SurfaceHolder holder) {
