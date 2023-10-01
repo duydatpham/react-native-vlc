@@ -1,205 +1,249 @@
-import React from 'react'
-import ReactNative from 'react-native'
-import PropTypes from 'prop-types'
+import React, { Component } from 'react';
+import { StyleSheet, requireNativeComponent, View, Platform } from 'react-native';
+import PropTypes from 'prop-types';
+import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
-const {
-  Component
-} = React
-
-const {
-  StyleSheet,
-  requireNativeComponent,
-  View,
-  NativeModules,
-  Dimensions,
-  Platform
-} = ReactNative
-
-const VLCKPlayerManager = NativeModules.VLCPlayerManager || NativeModules.VLCPlayerModule
-let { scale } = Dimensions.get('window');
 export default class VLCPlayer extends Component {
-  constructor(props, context) {
-    super(props, context)
-    this.seek = this.seek.bind(this)
-    this.snapshot = this.snapshot.bind(this)
-    this._assignRoot = this._assignRoot.bind(this)
-    this._onError = this._onError.bind(this)
-    this._onProgress = this._onProgress.bind(this)
-    this._onEnded = this._onEnded.bind(this)
-    this._onPlaying = this._onPlaying.bind(this)
-    this._onStopped = this._onStopped.bind(this)
-    this._onPaused = this._onPaused.bind(this)
-    this._onBuffering = this._onBuffering.bind(this)
-    this._onVolumeChanged = this._onVolumeChanged.bind(this)
-  }
+	constructor(props, context) {
+		super(props, context);
+		this.seek = this.seek.bind(this);
+		this.resume = this.resume.bind(this);
+		this.play = this.play.bind(this);
+		this.snapshot = this.snapshot.bind(this);
+		this._assignRoot = this._assignRoot.bind(this);
+		this._onProgress = this._onProgress.bind(this);
+		this._onLoadStart = this._onLoadStart.bind(this);
+		this._onSnapshot = this._onSnapshot.bind(this);
+		this._onIsPlaying = this._onIsPlaying.bind(this);
+		this._onVideoStateChange = this._onVideoStateChange.bind(this);
+		this.clear = this.clear.bind(this);
+		this.changeVideoAspectRatio = this.changeVideoAspectRatio.bind(this);
+	}
 
-  setNativeProps(nativeProps) {
-    this._root.setNativeProps(nativeProps)
-  }
+	static defaultProps = {
+		autoplay: true,
+	};
 
-  play() {
-    this.setNativeProps({ paused: false })
-  }
+	setNativeProps(nativeProps) {
+		this._root.setNativeProps(nativeProps);
+	}
 
-  pause() {
-    this.setNativeProps({ paused: true })
-  }
+	clear() {
+		this.setNativeProps({ clear: true });
+	}
 
-  seek(pos) {
-    this.setNativeProps({ seek: pos })
-  }
+	seek(pos) {
+		this.setNativeProps({ seek: pos });
+	}
 
-  snapshot(path) {
-    this.setNativeProps({ snapshotPath: path })
-  }
+	autoAspectRatio(isAuto) {
+		this.setNativeProps({ autoAspectRatio: isAuto });
+	}
 
-  _assignRoot(component) {
-    this._root = component
-  }
+	changeVideoAspectRatio(ratio) {
+		this.setNativeProps({ videoAspectRatio: ratio });
+	}
 
-  _onBuffering(event) {
-    if (this.props.onVLCBuffering) {
-      this.props.onVLCBuffering(event.nativeEvent)
-    }
-  }
+	play(paused) {
+		this.setNativeProps({ paused: paused });
+	}
 
-  _onError(event) {
-    if (this.props.onVLCError) {
-      this.props.onVLCError(event.nativeEvent)
-    }
-  }
+	position(position) {
+		this.setNativeProps({ position: position });
+	}
 
-  _onProgress(event) {
-    if (this.props.onVLCProgress) {
-      this.props.onVLCProgress(event.nativeEvent)
-    }
-  }
+	resume(isResume) {
+		this.setNativeProps({ resume: isResume });
+	}
 
-  _onEnded(event) {
-    if (this.props.onVLCEnded) {
-      this.props.onVLCEnded(event.nativeEvent)
-    }
-  }
+	snapshot(path) {
+		this.setNativeProps({ snapshotPath: path });
+	}
 
-  _onStopped(event) {
-    this.setNativeProps({ paused: true })
-    if (this.props.onVLCStopped) {
-      this.props.onVLCStopped(event.nativeEvent)
-    }
-  }
+	_assignRoot(component) {
+		this._root = component;
+	}
 
-  _onPaused(event) {
-    if (this.props.onVLCPaused) {
-      this.props.onVLCPaused(event.nativeEvent)
-    }
-  }
+	_onVideoStateChange(event) {
+		const type = event.nativeEvent.type;
+		if (__DEV__ && this.props.showLog) {
+			console.log(type, event.nativeEvent);
+		}
+		switch (type) {
+			case 'Opening':
+				this.props.onOpen && this.props.onOpen(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'Playing':
+				this.props.onPlaying && this.props.onPlaying(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'Paused':
+				this.props.onPaused && this.props.onPaused(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'Stoped':
+				this.props.onStopped && this.props.onStopped(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'Ended':
+				this.props.onEnd && this.props.onEnd(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'Buffering':
+				this.props.onBuffering && this.props.onBuffering(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'onLoadStart':
+				this.props.onLoadStart && this.props.onLoadStart(event.nativeEvent);
+				break;
+			case 'Error':
+				this.props.onError && this.props.onError(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			case 'TimeChanged':
+				this.props.onProgress && this.props.onProgress(event.nativeEvent);
+				this.props.onIsPlaying && this.props.onIsPlaying(event.nativeEvent);
+				break;
+			default:
+				this.props.onVideoStateChange && this.props.onVideoStateChange(event);
+				break;
+		}
+	}
 
-  _onPlaying(event) {
-    if (this.props.onVLCPlaying) {
-      this.props.onVLCPlaying(event.nativeEvent)
-    }
-  }
+	_onLoadStart(event) {
+		if (this.props.onLoadStart) {
+			this.props.onLoadStart(event.nativeEvent);
+		}
+	}
 
-  _onVolumeChanged(event) {
-    if (this.props.onVLCVolumeChanged) {
-      this.props.onVLCVolumeChanged(event.nativeEvent)
-    }
-  }
+	_onProgress(event) {
+		if (this.props.onProgress) {
+			this.props.onProgress(event.nativeEvent);
+		}
+	}
 
-  componentWillUnmount() {
-    VLCKPlayerManager.releaseView()
-  }
+	_onIsPlaying(event) {
+		if (this.props.onIsPlaying) {
+			this.props.onIsPlaying(event.nativeEvent);
+		}
+	}
 
+	_onSnapshot(event) {
+		if (this.props.onSnapshot) {
+			this.props.onSnapshot(event.nativeEvent);
+		}
+	}
 
-  resize(size) {
-    this.setNativeProps({ resize: size })
-  }
+	render() {
+		const source = resolveAssetSource({ ...this.props.source }) || {};
+		const uri = source.uri || '';
+		let isNetwork = !!(uri && uri.match(/^https?:/));
+		const isAsset = !!(uri && uri.match(/^(assets-library|file|content|ms-appx|ms-appdata):/));
+		if (!isAsset) {
+			isNetwork = true;
+		}
+		if (uri && uri.match(/^\//)) {
+			isNetwork = false;
+		}
+		if (Platform.OS === 'ios') {
+			source.mediaOptions = this.props.mediaOptions || {};
+		} else {
+			let mediaOptionsList = [];
+			let mediaOptions = this.props.mediaOptions || {};
+			let keys = Object.keys(mediaOptions);
+			for (let i = 0; i < keys.length - 1; i++) {
+				let optionKey = keys[i];
+				let optionValue = mediaOptions[optionKey];
+				mediaOptionsList.push(optionKey + '=' + optionValue);
+			}
+			source.mediaOptions = mediaOptionsList;
+		}
+		source.initOptions = this.props.initOptions || [];
+		source.isNetwork = isNetwork;
+		source.autoplay = this.props.autoplay;
+		if (!isNaN(this.props.hwDecoderEnabled) && !isNaN(this.props.hwDecoderForced)) {
+			source.hwDecoderEnabled = this.props.hwDecoderEnabled;
+			source.hwDecoderForced = this.props.hwDecoderForced;
+		}
+		if (this.props.initType) {
+			source.initType = this.props.initType;
+		} else {
+			source.initType = 1;
+		}
 
-  getStyleWidth(props) {
-    if (!props)
-      return undefined
-    for (let i = 0; i < props.length; i++) {
-      if (props[i].width != undefined || props[i].height != undefined) {
-        return props[i]
-      }
-    }
+		//repeat the input media
+		//source.initOptions.push('--input-repeat=1000');
+		const nativeProps = Object.assign({}, this.props);
+		Object.assign(nativeProps, {
+			style: [styles.base, nativeProps.style],
+			source: source,
+			onVideoLoadStart: this._onLoadStart,
+			onVideoProgress: this._onProgress,
+			onVideoStateChange: this._onVideoStateChange,
+			onSnapshot: this._onSnapshot,
+			onIsPlaying: this._onIsPlaying,
+			progressUpdateInterval: 250,
+		});
 
-    return undefined
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (Platform.OS == 'android') {
-      try {
-        let currentPropsStyle = this.getStyleWidth(this.props.style)
-        let nextPropsStyle = this.getStyleWidth(nextProps.style)
-        if (currentPropsStyle.width != nextPropsStyle.width || currentPropsStyle.height != nextPropsStyle.height) {
-          this.resize({ width: (nextPropsStyle.width || 0) * scale, height: (nextPropsStyle.height || 0) * scale })
-        }
-      } catch (error) {
-
-      }
-    }
-  }
-
-  render() {
-    const {
-      source
-    } = this.props
-    source.initOptions = source.initOptions || []
-    // repeat the input media
-    const nativeProps = Object.assign({}, this.props)
-    Object.assign(nativeProps, {
-      style: [styles.base, nativeProps.style],
-      source: source,
-      onVLCError: this._onError,
-      onVLCProgress: this._onProgress,
-      onVLCEnded: this._onEnded,
-      onVLCPlaying: this._onPlaying,
-      onVLCPaused: this._onPaused,
-      onVLCStopped: this._onStopped,
-      onVLCBuffering: this._onBuffering,
-      onVLCVolumeChanged: this._onVolumeChanged
-    })
-
-    return (
-      <RCTVLCPlayer ref={this._assignRoot} {...nativeProps} />
-    )
-  }
+		return <RCTVLCPlayer ref={this._assignRoot} {...nativeProps} />;
+	}
 }
 
 VLCPlayer.propTypes = {
-  /* Wrapper component */
-  source: PropTypes.object,
+	/* Native only */
+	rate: PropTypes.number,
+	seek: PropTypes.number,
+	resume: PropTypes.bool,
+	position: PropTypes.number,
+	snapshotPath: PropTypes.string,
+	paused: PropTypes.bool,
+	autoAspectRatio: PropTypes.bool,
+	videoAspectRatio: PropTypes.string,
+	/**
+	 * 0 --- 200
+	 */
+	volume: PropTypes.number,
+	volumeUp: PropTypes.number,
+	volumeDown: PropTypes.number,
+	repeat: PropTypes.bool,
+	muted: PropTypes.bool,
 
-  /* Native only */
-  paused: PropTypes.bool,
-  seek: PropTypes.number,
-  resize: PropTypes.object,
-  rate: PropTypes.number,
-  volume: PropTypes.number,
-  snapshotPath: PropTypes.string,
+	hwDecoderEnabled: PropTypes.number,
+	hwDecoderForced: PropTypes.number,
 
-  onVLCPaused: PropTypes.func,
-  onVLCStopped: PropTypes.func,
-  onVLCBuffering: PropTypes.func,
-  onVLCPlaying: PropTypes.func,
-  onVLCEnded: PropTypes.func,
-  onVLCError: PropTypes.func,
-  onVLCProgress: PropTypes.func,
-  onVLCVolumeChanged: PropTypes.func,
+	onVideoLoadStart: PropTypes.func,
+	onVideoStateChange: PropTypes.func,
+	onVideoProgress: PropTypes.func,
+	onSnapshot: PropTypes.func,
+	onIsPlaying: PropTypes.func,
+	onOpen: PropTypes.func,
+	onLoadStart: PropTypes.func,
 
-  /* Required by react-native */
-  scaleX: PropTypes.number,
-  scaleY: PropTypes.number,
-  translateX: PropTypes.number,
-  translateY: PropTypes.number,
-  rotation: PropTypes.number,
-  ...View.propTypes
-}
+	/* Wrapper component */
+	source: PropTypes.oneOfType([PropTypes.object, PropTypes.number]),
+	play: PropTypes.func,
+	snapshot: PropTypes.func,
+	onError: PropTypes.func,
+	onProgress: PropTypes.func,
+	onEnded: PropTypes.func,
+	onStopped: PropTypes.func,
+	onPlaying: PropTypes.func,
+	onPaused: PropTypes.func,
+
+	/* Required by react-native */
+	scaleX: PropTypes.number,
+	scaleY: PropTypes.number,
+	translateX: PropTypes.number,
+	translateY: PropTypes.number,
+	rotation: PropTypes.number,
+	...View.propTypes,
+};
 
 const styles = StyleSheet.create({
-  base: {
-    overflow: 'hidden'
-  }
-})
-const RCTVLCPlayer = requireNativeComponent('RCTVLCPlayer', VLCPlayer)
+	base: {
+		overflow: 'hidden',
+	},
+});
+
+const RCTVLCPlayer = requireNativeComponent('RCTVLCPlayer', VLCPlayer);

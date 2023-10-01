@@ -1,22 +1,22 @@
 #import "React/RCTView.h"
 
-@class VLCMediaPlayer;
+@class RCTEventDispatcher;
 
 @interface RCTVLCPlayer : UIView
 
-- (instancetype)initWithPlayer:(VLCMediaPlayer*)player;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoProgress;
+/*@property (nonatomic, copy) RCTBubblingEventBlock onVideoPaused;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoStopped;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoBuffering;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoPlaying;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoEnded;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoError;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoOpen;*/
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoLoadStart;
+@property (nonatomic, copy) RCTBubblingEventBlock onSnapshot;
+@property (nonatomic, copy) RCTBubblingEventBlock onIsPlaying;
+@property (nonatomic, copy) RCTBubblingEventBlock onVideoStateChange;
 
-@property (nonatomic) BOOL paused;
-@property (nonatomic) float volume;
-- (void)_release;
-
-@property (nonatomic, copy) RCTDirectEventBlock onVLCPaused;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCStopped;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCBuffering;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCPlaying;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCEnded;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCError;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCProgress;
-@property (nonatomic, copy) RCTDirectEventBlock onVLCVolumeChanged;
+- (instancetype)initWithEventDispatcher:(RCTEventDispatcher *)eventDispatcher NS_DESIGNATED_INITIALIZER;
 
 @end
