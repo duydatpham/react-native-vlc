@@ -6,7 +6,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Slider from 'react-native-slider';
+import { Slider } from '@miblanchard/react-native-slider';
 
 export default class ControlBtn extends Component {
   static defaultProps = {
